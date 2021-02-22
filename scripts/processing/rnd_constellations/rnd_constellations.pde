@@ -42,6 +42,7 @@ color[] backgroundDotRNDcolors = {
   #01EDFD, #00FFFF, #00CCCC, #0CCAB3, #00A693, #009B7D, #008B8B, #008080, #006D6F, #004C54, #007BA7, #0D98BA, #00B7EB, #00A6FE, #3AA8C1, #43B3AE, #3AB09E, #20B2AA, #40E0D0, #7DF9FF, #B2FFFF, #E0FFFF, #C0E8D5, #A8C3BC, #88D8C0, #7FFFD4, #87D3F8, #40826D, #2E8B57, #00A86B
 };
 int backgroundDotRNDcolorsArrayMaxIDX = backgroundDotRNDcolors.length;
+float wayOutOfBoundsDistance;
 
 void setup(){
   // fullScreen();
@@ -67,6 +68,7 @@ void setup(){
   }
   
   noStroke();
+  wayOutOfBoundsDistance = width * height * 3452.04;       // code smell that I need to set that to a guessed out of range number?
 }
 
 void draw(){
@@ -96,23 +98,25 @@ void draw(){
     ellipse(starLocation.x + RNDx, starLocation.y + RNDy, backgroundDotSize + RNDx, backgroundDotSize + RNDx);
   }
   // bubble sort point list to be sorted by nearest point next; do this to a copy of the ArrayList:
+//TO DO: add an outer loop that repeatedly copies an altered copy of starPVectors (yes copy of copy) (reduced--after finding nearest previous idx coord) ; like this? :
   // ArrayList<PVector> starPVectorsNearestSort = new ArrayList<PVector>();
   // for (PVector c : starPVectors) { starPVectorsNearestSort.add(c); }    // is there a function that copies ArrayLists though?
-  // starPVectorsNearestSort = 
   print("NEW VARIANT . . .\n");
   float dist;
-  float shortestFoundDist = 378278.01;
-  // float shortestFoundDistTMP = 0;
-  for (PVector p : starPVectors) {
-    for (PVector q : starPVectors) {
-      dist = p.dist(q);
+  float shortestFoundDist = wayOutOfBoundsDistance;
+  PVector nearestPointA = new PVector(); PVector nearestPointB = new PVector();
+  int starPVectorsLength = starPVectors.size();
+  for (int i = 0; i < starPVectorsLength; i ++) {
+    for (int j = 0; j < starPVectorsLength; j++) {
+      dist = starPVectors.get(i).dist(starPVectors.get(j));   // this convoluted thing gets the distance between index i and j in starPVectors
       if (dist < shortestFoundDist && dist != 0) {
         print("dist " + dist + " < shortestFoundDist " + shortestFoundDist + " . . ");
         shortestFoundDist = dist;
+        nearestPointA = starPVectors.get(i).copy(); nearestPointB = starPVectors.get(j).copy();
       }
     }
     print ("shortest found dist: " + shortestFoundDist + "\n");
-    shortestFoundDist = 378278.01;
+    shortestFoundDist = wayOutOfBoundsDistance;
   }
     // increment associated bgPointColors color IDX:
     bgPointColors.get(layoutPointCounter).rotateColorIDX();
