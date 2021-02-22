@@ -13,6 +13,8 @@ String version = "1.0.0";
 // This git commit: parameter set 2 (a variant of the work).
 
 import dawesometoolkit.*;
+// import java.util.ArrayList;    // imported by default?
+import java.util.Collections;
 
 class rotatingColorIDX {
   int colorIDX = 0;
@@ -75,14 +77,11 @@ void draw(){
 
   // randomly wiggling vogel dots behind the main, non-wiggling dots:
   int layoutPointCounter = 0;
-//  for (PVector p : vogelLayout) {
-//->!
     int bgPointColorIDX = bgPointColors.get(layoutPointCounter).colorIDX;
     color bgPointColor = backgroundDotRNDcolors[bgPointColorIDX];
     fill(bgPointColor);
-//->!
-  int howManyStars = (int) random(5, 11);
-  print("will create from " + howManyStars + " points.\n");
+  int howManyStars = (int) random(5, 13);
+//  print("will create from " + howManyStars + " points.\n");
   ArrayList<PVector> starPVectors = new ArrayList<PVector>();
   for (int i = 0; i < howManyStars; i++) {
       int RNDx = int(random(-4, 4));
@@ -91,23 +90,38 @@ void draw(){
       fill(backgroundDotRNDcolors[RNDbgColorDotIDX]);
     int rndVogelLayoutIDX = (int) random(0, howManyVogelPoints);
     PVector starLocation = vogelLayout.get(rndVogelLayoutIDX);
-    print("got " + (int) starLocation.x + " and " + (int) starLocation.y + "\n");
+//    print("got " + (int) starLocation.x + " and " + (int) starLocation.y + " .. ");
+    starPVectors.add(starLocation);
+    // COMMENT THIS OUT once I get a sorted list to use:
     ellipse(starLocation.x + RNDx, starLocation.y + RNDy, backgroundDotSize + RNDx, backgroundDotSize + RNDx);
   }
-      // FORMER CODE:
-//    ellipse(p.x + RNDx, p.y + RNDy, backgroundDotSize, backgroundDotSize);
+  // bubble sort point list to be sorted by nearest point next; do this to a copy of the ArrayList:
+  // ArrayList<PVector> starPVectorsNearestSort = new ArrayList<PVector>();
+  // for (PVector c : starPVectors) { starPVectorsNearestSort.add(c); }    // is there a function that copies ArrayLists though?
+  // starPVectorsNearestSort = 
+  print("NEW VARIANT . . .\n");
+  float dist;
+  float shortestFoundDist = 378278.01;
+  // float shortestFoundDistTMP = 0;
+  for (PVector p : starPVectors) {
+    for (PVector q : starPVectors) {
+      dist = p.dist(q);
+      if (dist < shortestFoundDist && dist != 0) {
+        print("dist " + dist + " < shortestFoundDist " + shortestFoundDist + " . . ");
+        shortestFoundDist = dist;
+      }
+    }
+    print ("shortest found dist: " + shortestFoundDist + "\n");
+    shortestFoundDist = 378278.01;
+  }
     // increment associated bgPointColors color IDX:
     bgPointColors.get(layoutPointCounter).rotateColorIDX();
     layoutPointCounter += 1;
-//  }
-
-  // fixed color, slightly smaller, fixed position dots in front of those; OR, if you comment out the next fill line, the fill color is the same in every one but rotates! :
-  //fill(#5c38ff);  // medium blue-violet
-// for (PVector p : vogelLayout) {
-//->!
-    // FORMER CODE:
-    // ellipse(p.x, p.y, foregroundDotSize, foregroundDotSize);
-// }
+      // FORMER CODE:
+      // fixed color, slightly smaller, fixed position dots in front of those; OR, if you comment out the next fill line, the fill color is the same in every one but rotates! :
+      //fill(#5c38ff);  // medium blue-violet
+      // for (PVector p : vogelLayout) {
+      // ellipse(p.x, p.y, foregroundDotSize, foregroundDotSize);
   // saveFrame("/##########.png");
   delay(1800);
 }
