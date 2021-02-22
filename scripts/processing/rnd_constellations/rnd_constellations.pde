@@ -1,5 +1,5 @@
 // DESCRIPTION
-// Experiment hacking another script (vogel_spiral_dots_animated.pde) to generates random constellation-like collections of dots connected by lines.
+// Experiment hacking another script (vogel_spiral_dots_animated.pde) to generate random constellation-like collections of dots connected by lines.
 
 // DEPENDENCIES
 // dawesome toolkit (Processing library)
@@ -14,11 +14,11 @@ String version = "1.0.0";
 
 import dawesometoolkit.*;
 
-class wrappingColorIDX {
+class rotatingColorIDX {
   int colorIDX = 0;
   int maxColorIDX = 0;
   
-  wrappingColorIDX(int initColorIDX, int passedMaxColorIDX) {
+  rotatingColorIDX(int initColorIDX, int passedMaxColorIDX) {
     colorIDX = initColorIDX;
     maxColorIDX = passedMaxColorIDX;
   }
@@ -30,10 +30,11 @@ class wrappingColorIDX {
 }
 
 DawesomeToolkit dawesome;
-ArrayList<PVector> layout;
-ArrayList<wrappingColorIDX> bgPointColors;
-int backgroundDotSize = 40;
-//int foregroundDotSize = 15;
+int howManyVogelPoints;   // intended to determine the length of the following ArrayList:
+ArrayList<PVector> vogelLayout;
+ArrayList<rotatingColorIDX> bgPointColors;
+int backgroundDotSize = 21;
+int foregroundDotSize = 15;
 int vogelPointsDistance = 13;
 color[] backgroundDotRNDcolors = {
   #01EDFD, #00FFFF, #00CCCC, #0CCAB3, #00A693, #009B7D, #008B8B, #008080, #006D6F, #004C54, #007BA7, #0D98BA, #00B7EB, #00A6FE, #3AA8C1, #43B3AE, #3AB09E, #20B2AA, #40E0D0, #7DF9FF, #B2FFFF, #E0FFFF, #C0E8D5, #A8C3BC, #88D8C0, #7FFFD4, #87D3F8, #40826D, #2E8B57, #00A86B
@@ -41,25 +42,24 @@ color[] backgroundDotRNDcolors = {
 int backgroundDotRNDcolorsArrayMaxIDX = backgroundDotRNDcolors.length;
 
 void setup(){
-  fullScreen();
-  // size(1200,630);
+  // fullScreen();
+  size(800,800);   // prev. values: 1200,630
   // size(1920,1080);
   boolean widthGreaterThanHeight;
   //determine if width or height is greater and do math on the larger value:
-  int howManyVogelPoints;
-  if (width > height) {howManyVogelPoints = int(width * 3.8);} else {howManyVogelPoints = int(height * 3.8);}
+  if (width > height) {howManyVogelPoints = int(width * .95);} else {howManyVogelPoints = int(height * .95);}   // prev. intended fill value: 3.8
   dawesome = new DawesomeToolkit(this);
-  layout = dawesome.vogelLayout(howManyVogelPoints,vogelPointsDistance);
-  bgPointColors = new ArrayList<wrappingColorIDX>();
+  vogelLayout = dawesome.vogelLayout(howManyVogelPoints,vogelPointsDistance);
+  bgPointColors = new ArrayList<rotatingColorIDX>();
   
   // init bgPointColors ArrayList; thx to help from: https://stackoverflow.com/a/3982597
-  bgPointColors = new ArrayList<wrappingColorIDX>();
+  bgPointColors = new ArrayList<rotatingColorIDX>();
   int bgColorInitIDX = 0;
-  for (PVector p : layout) {
+  for (PVector p : vogelLayout) {
     // add one to bgPointColors for every point in layout, with rnd start IDX, highest poss idx backgroundDotRNDcolorsArrayMaxIDX:
       // had at first chosen rnd bg color; wanted to see how it looks with rotate through them per point:
       // int bgColorInitIDX = (int) random(0, backgroundDotRNDcolorsArrayMaxIDX);
-    bgPointColors.add(new wrappingColorIDX(bgColorInitIDX, backgroundDotRNDcolorsArrayMaxIDX));
+    bgPointColors.add(new rotatingColorIDX(bgColorInitIDX, backgroundDotRNDcolorsArrayMaxIDX));
     // increment the color idx and reset to zero if above max index:
     bgColorInitIDX += 1; if (bgColorInitIDX >= backgroundDotRNDcolorsArrayMaxIDX) {bgColorInitIDX = 0;}
   }
@@ -75,26 +75,39 @@ void draw(){
 
   // randomly wiggling vogel dots behind the main, non-wiggling dots:
   int layoutPointCounter = 0;
-  for (PVector p : layout) {
-    int RNDx = int(random(-2, 2));
-    int RNDy = int(random(-2, 2));
-      // random bg dot color changing experiment I'm not sure I liked:
-      // int RNDbgColorDotIDX = (int) random(backgroundDotRNDcolorsArrayMaxIDX);
-      // fill(backgroundDotRNDcolors[RNDbgColorDotIDX]);
+//  for (PVector p : vogelLayout) {
+//->!
     int bgPointColorIDX = bgPointColors.get(layoutPointCounter).colorIDX;
     color bgPointColor = backgroundDotRNDcolors[bgPointColorIDX];
     fill(bgPointColor);
-    // ellipse(p.x + RNDx, p.y + RNDy, backgroundDotSize, backgroundDotSize);
+//->!
+  int howManyStars = (int) random(5, 11);
+  print("will create from " + howManyStars + " points.\n");
+  ArrayList<PVector> starPVectors = new ArrayList<PVector>();
+  for (int i = 0; i < howManyStars; i++) {
+      int RNDx = int(random(-4, 4));
+      int RNDy = int(random(-4, 4));
+      int RNDbgColorDotIDX = (int) random(backgroundDotRNDcolorsArrayMaxIDX);
+      fill(backgroundDotRNDcolors[RNDbgColorDotIDX]);
+    int rndVogelLayoutIDX = (int) random(0, howManyVogelPoints);
+    PVector starLocation = vogelLayout.get(rndVogelLayoutIDX);
+    print("got " + (int) starLocation.x + " and " + (int) starLocation.y + "\n");
+    ellipse(starLocation.x + RNDx, starLocation.y + RNDy, backgroundDotSize + RNDx, backgroundDotSize + RNDx);
+  }
+      // FORMER CODE:
+//    ellipse(p.x + RNDx, p.y + RNDy, backgroundDotSize, backgroundDotSize);
     // increment associated bgPointColors color IDX:
     bgPointColors.get(layoutPointCounter).rotateColorIDX();
     layoutPointCounter += 1;
-  }
+//  }
 
-  // fixed color, slightly smaller, fixed position dots in front of those:
+  // fixed color, slightly smaller, fixed position dots in front of those; OR, if you comment out the next fill line, the fill color is the same in every one but rotates! :
   //fill(#5c38ff);  // medium blue-violet
-  //for (PVector p : layout) {
-  // ellipse(p.x, p.y, foregroundDotSize, foregroundDotSize);
-  //}
-  //saveFrame("/##########.png");
-  delay(1200);
+// for (PVector p : vogelLayout) {
+//->!
+    // FORMER CODE:
+    // ellipse(p.x, p.y, foregroundDotSize, foregroundDotSize);
+// }
+  // saveFrame("/##########.png");
+  delay(1800);
 }
